@@ -2,6 +2,8 @@ package edu.tilegame.tengine;
 
 import org.junit.jupiter.api.Test;
 
+import com.googlecode.lanterna.terminal.Terminal;
+
 public class TileRendererTest {
     public static void main(String[] args) {
         int w = 50;
@@ -9,7 +11,11 @@ public class TileRendererTest {
 
         Tile[][] stage = new Tile[w][h];
 
-        TileRenderer tr = new TileRenderer(w, h);
+        CustomTerminalFactory ctf = new CustomTerminalFactory();
+        ctf.setTerminalSize(w, h);
+        Terminal term = ctf.createCustomTerminal();
+
+        TileRenderer tr = new TileRenderer(w, h, term);
 
         // Fill stage with AIR.
         for (int i = 0; i < stage.length; ++i) {

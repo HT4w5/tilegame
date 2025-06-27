@@ -1,12 +1,9 @@
 package edu.tilegame.tengine;
 
-import com.googlecode.lanterna.TextCharacter;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
-
-import com.googlecode.lanterna.SGR;
 
 public class Tile {
     private final char character;

@@ -77,4 +77,10 @@ public class Position {
             return false;
         }
     }
+
+    public double distanceTo(Position other) {
+        int dx = xPos - other.xPos;
+        int dy = yPos - other.yPos;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
 }

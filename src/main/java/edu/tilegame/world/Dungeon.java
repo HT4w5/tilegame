@@ -1,15 +1,11 @@
 package edu.tilegame.world;
 
-import java.nio.file.DirectoryIteratorException;
-import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Random;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.Vector;
 
 import edu.tilegame.tengine.*;
@@ -28,7 +24,6 @@ public class Dungeon extends AbstractWorldGenerator {
     private final int ROOM_MAX_HEIGHT;
     private final Tile FLOOR;
     private final Tile WALL;
-    private final Tile DOOR;
 
     private final int WINDING_PERCENT;
     private final int EXTRA_CONNECTOR_CHANCE;
@@ -36,6 +31,9 @@ public class Dungeon extends AbstractWorldGenerator {
     private Vector<Rect> rooms;
     private int[][] regionMask;
     private int currentRegion;
+
+    private Position exitPosition;
+    private Position playerInitialPosition;
 
     public Dungeon(World world, int roomGenTrials, int minWidth, int maxWidth, int minHeight,
             int maxHeight, Tile floor, Tile wall) {
@@ -54,7 +52,6 @@ public class Dungeon extends AbstractWorldGenerator {
 
         WINDING_PERCENT = 50; // TODO: Add to params.
         EXTRA_CONNECTOR_CHANCE = 10000;
-        DOOR = Tileset.LOCKED_DOOR;
 
         rooms = new Vector<>(ROOM_GEN_TRIALS / 3); // TODO: Optimize pre-allocation.
         regionMask = new int[world.WIDTH][world.HEIGHT];
@@ -99,8 +96,8 @@ public class Dungeon extends AbstractWorldGenerator {
         connectRegions();
 
         removeDeadEnds();
-        removeExtraWalls();
-        fillWalls();
+        generateExit();
+        generatePlayer();
     }
 
     private void generateRooms() {
@@ -391,139 +388,54 @@ public class Dungeon extends AbstractWorldGenerator {
         }
     }
 
-    private void removeExtraWalls() {
-        Vector<Position> extraWalls = new Vector<>();
-        for (int i = 0; i < world.WIDTH; ++i) {
-            for (int j = 0; j < world.HEIGHT; ++j) {
-                Position pos = new Position(i, j);
-                if (world.getTile(pos) != WALL) {
-                    continue;
-                }
-                // Add to remove list if surrounded by walls.
-                int exits = 0;
-                for (Direction dir : Direction.values()) {
-                    Position newPos = pos.add(dir);
-                    if (world.contains(newPos) && world.getTile(newPos) != WALL) {
-                        ++exits;
-                    }
-                }
-
-                if (exits != 0) {
-                    continue;
-                }
-
-                extraWalls.add(pos);
-            }
-        }
-
-        // Remove.
-        for (Position pos : extraWalls) {
-            world.setTile(pos.getX(), pos.getY(), Tileset.AIR);
-        }
-    }
-
-    private void fillWalls() {
-        // boolean done = false;
-
-        for (int i = 0; i < world.WIDTH; ++i) {
-            for (int j = 0; j < world.HEIGHT; ++j) {
-                Position pos = new Position(i, j);
-                if (world.getTile(pos) != Tileset.AIR) {
-                    continue;
-                }
-
-                int adj = 0;
-                for (Direction dir : Direction.values()) {
-                    try {
-                        if (world.getTile(pos.add(dir)) == Tileset.WALL) {
-                            ++adj;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                    }
-                }
-
-                if (adj != 2) {
-                    continue;
-                }
-
-                // Remove tile.
-                // done = false;
-                world.setTile(i, j, WALL);
-            }
-        }
-
-    }
-
-    /*
-     * Old implemention.
-     * public void generate(World world, long seed) {
-     * // Generate rooms.
-     * Random random = new Random(seed);
-     * int xPos, yPos, width, height;
-     * Vector<Room> rooms = new Vector<>(40);
-     * for (int i = 0; i < ROOM_GEN_TRIALS; ++i) {
-     * // Generate room props from seed.
-     * xPos = RandomUtils.uniform(random, world.WIDTH - 1);
-     * yPos = RandomUtils.uniform(random, world.HEIGHT - 1);
-     * width = RandomUtils.uniform(random, MIN_WIDTH, MAX_WIDTH);
-     * height = RandomUtils.uniform(random, MIN_HEIGHT, MAX_HEIGHT);
-     * rooms.add(new Room(xPos, yPos, width, height));
-     * }
-     * // Discard 50% overlapping.
-     * 
-     * double factor;
-     * int origSize = rooms.size();
-     * for (int i = 0; i < origSize - 1; ++i) {
-     * for (int j = i + 1; j < origSize; ++j) {
-     * if (rooms.get(i).overlapsWith(rooms.get(j))) {
-     * factor = RandomUtils.uniform(random);
-     * if (true) {
-     * rooms.set(i, null);
-     * break;
-     * }
-     * }
-     * }
-     * }
-     * 
-     * // Draw hallways.
-     * Room tmp;
-     * Vector<Hallway> hallways = new Vector<>(rooms.size() / 2);
-     * int maxLen = Math.max(world.WIDTH, world.HEIGHT);
-     * for (int i = 0; i < rooms.size(); ++i) {
-     * tmp = rooms.get(i);
-     * if (tmp == null) {
-     * continue;
-     * }
-     * 
-     * // Generate random starting points and lengths.
-     * factor = RandomUtils.uniform(random);
-     * boolean vert = false;
-     * if (factor > 0.5) {
-     * vert = true;
-     * }
-     * 
-     * int xStart = tmp.getXPos() + RandomUtils.uniform(random, tmp.getWidth());
-     * int yStart = tmp.getYPos() + RandomUtils.uniform(random, tmp.getHeight());
-     * 
-     * factor = RandomUtils.uniform(random);
-     * 
-     * if (factor > 0.3) {
-     * hallways.add(new Hallway(xStart, yStart, vert,
-     * RandomUtils.uniform(random, maxLen), Tileset.FLOOR, Tileset.WALL));
-     * }
-     * }
-     * 
-     * // Store structures.
-     * for (Room r : rooms) {
-     * if (r != null) {
-     * world.addStructure(r);
-     * }
-     * }
-     * // for (Hallway h : hallways) {
-     * // world.addStructure(h);
-     * // }
-     * 
-     * world.clipStructures();
-     * }
+    /**
+     * Generates the exit of the world.
+     * Replaces the tile with Tileset.EXIT.
      */
+    private void generateExit() {
+        int x, y;
+        do {
+            x = RandomUtils.uniform(random, world.WIDTH);
+            y = RandomUtils.uniform(random, world.HEIGHT);
+        } while (world.getTile(x, y) != FLOOR);
+        exitPosition = new Position(x, y);
+        world.setTile(x, y, Tileset.EXIT);
+    }
+
+    /**
+     * Generates the entrance position for the player.
+     * Replaces the tile with Tileset.ENTRANCE.
+     * This method MUST run after generateExit().
+     */
+    // TODO: add a parameter to contol number of trials.
+    private void generatePlayer() {
+        // Try multiple times to find furthest position from exit.
+        Position bestPos = new Position(-1, -1);
+        double longestDistance = -1;
+        for (int i = 0; i < 5; ++i) {
+            Position pos;
+            do {
+                pos = new Position(RandomUtils.uniform(random, world.WIDTH),
+                        RandomUtils.uniform(random, world.HEIGHT));
+            } while (world.getTile(pos) != FLOOR);
+            double dist = pos.distanceTo(exitPosition);
+            if (dist > longestDistance) {
+                bestPos = pos;
+            }
+        }
+
+        // Set tile and record position.
+        playerInitialPosition = bestPos;
+        world.setTile(bestPos.getX(), bestPos.getY(), Tileset.ENTRANCE);
+    }
+
+    @Override
+    public Position getPlayerInitialPosition() {
+        return playerInitialPosition;
+    }
+
+    @Override
+    public Position getExitPosition() {
+        return exitPosition;
+    }
 }
