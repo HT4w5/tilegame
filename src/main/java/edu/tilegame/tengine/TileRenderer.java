@@ -1,10 +1,16 @@
 package edu.tilegame.tengine;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.awt.Font;
+import java.awt.FontFormatException;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.swing.AWTTerminalFontConfiguration;
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 
 import edu.tilegame.exceptions.ScreenTooSmallException;
 import edu.tilegame.Properties;
@@ -22,6 +28,21 @@ public class TileRenderer {
         DefaultTerminalFactory dtf = new DefaultTerminalFactory();
         dtf.setPreferTerminalEmulator(true);
         dtf.setTerminalEmulatorTitle(Properties.GAME_TITLE + " v" + Properties.GAME_VERSION);
+
+        // Use custom font on swing.
+        try {
+            InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts/AcPlus_ToshibaSat_8x8.ttf");
+            if (fontStream != null) {
+                Font customFont = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(Font.PLAIN, 10);
+                dtf.setTerminalEmulatorFontConfiguration(
+                        SwingTerminalFontConfiguration.newInstance(customFont));
+            }
+
+        } catch (FontFormatException | IOException e) {
+            System.err.println("Failed to load custom font");
+            e.printStackTrace();
+        }
+
         dtf.setInitialTerminalSize(new TerminalSize(w, h));
 
         try {

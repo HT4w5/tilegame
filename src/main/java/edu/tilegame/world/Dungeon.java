@@ -100,6 +100,7 @@ public class Dungeon extends AbstractWorldGenerator {
 
         removeDeadEnds();
         removeExtraWalls();
+        fillWalls();
     }
 
     private void generateRooms() {
@@ -419,6 +420,38 @@ public class Dungeon extends AbstractWorldGenerator {
         for (Position pos : extraWalls) {
             world.setTile(pos.getX(), pos.getY(), Tileset.AIR);
         }
+    }
+
+    private void fillWalls() {
+        // boolean done = false;
+
+        for (int i = 0; i < world.WIDTH; ++i) {
+            for (int j = 0; j < world.HEIGHT; ++j) {
+                Position pos = new Position(i, j);
+                if (world.getTile(pos) != Tileset.AIR) {
+                    continue;
+                }
+
+                int adj = 0;
+                for (Direction dir : Direction.values()) {
+                    try {
+                        if (world.getTile(pos.add(dir)) == Tileset.WALL) {
+                            ++adj;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                    }
+                }
+
+                if (adj != 2) {
+                    continue;
+                }
+
+                // Remove tile.
+                // done = false;
+                world.setTile(i, j, WALL);
+            }
+        }
+
     }
 
     /*
