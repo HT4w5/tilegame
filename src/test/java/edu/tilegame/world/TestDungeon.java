@@ -1,10 +1,7 @@
 package edu.tilegame.world;
 
-import org.junit.jupiter.api.Test;
-
 import com.googlecode.lanterna.terminal.Terminal;
 
-import edu.tilegame.world.World;
 import edu.tilegame.tengine.*;
 
 public class TestDungeon {

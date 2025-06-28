@@ -1,7 +1,7 @@
 package edu.tilegame.tengine;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.awt.Font;
 import java.awt.FontFormatException;
 
@@ -29,12 +29,10 @@ public class CustomTerminalFactory {
 
         // Use custom font on swing.
         try {
-            InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts/AcPlus_ToshibaSat_8x8.ttf");
-            if (fontStream != null) {
-                Font customFont = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(Font.PLAIN, 20);
-                dtf.setTerminalEmulatorFontConfiguration(
-                        SwingTerminalFontConfiguration.newInstance(customFont));
-            }
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/AcPlus_ToshibaSat_8x8.ttf"))
+                    .deriveFont(Font.PLAIN, 20);
+            dtf.setTerminalEmulatorFontConfiguration(
+                    SwingTerminalFontConfiguration.newInstance(customFont));
 
         } catch (FontFormatException | IOException e) {
             System.err.println("Failed to load custom font");

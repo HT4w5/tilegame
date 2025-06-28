@@ -1,7 +1,5 @@
 package edu.tilegame.tengine;
 
-import org.junit.jupiter.api.Test;
-
 import com.googlecode.lanterna.terminal.Terminal;
 
 public class TileRendererTest {
