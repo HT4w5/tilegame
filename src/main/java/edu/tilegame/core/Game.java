@@ -12,7 +12,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 
 public class Game {
     // Must be odd numbers due to generation algorithum.
-    public static final int WIDTH = 81;
+    public static final int WIDTH = 61;
     public static final int HEIGHT = 31;
     private Terminal term;
     private TileRenderer tr;

@@ -90,20 +90,18 @@ public class Player extends MovableSprite {
      * @param dir
      */
     private void walk(Direction dir) {
-        if (dir != facing) {
-            facing = dir;
-            setTile(dir);
+        setDirection(dir);
+        // Check destination.
+        Position newPos = pos.add(dir);
+        if (walkables.contains(world.getTile(newPos))) {
+            moveTo(newPos);
         } else {
-            // Check destination.
-            Position newPos = pos.add(dir);
-            if (walkables.contains(world.getTile(newPos))) {
-                moveTo(newPos);
-            }
+            world.setTile(pos, tile);
         }
-
     }
 
-    private void setTile(Direction dir) {
+    private void setDirection(Direction dir) {
+        facing = dir;
         switch (dir) {
             case Direction.DOWN:
                 tile = Tileset.PLAYER_N;
@@ -124,7 +122,6 @@ public class Player extends MovableSprite {
             default:
                 break;
         }
-        world.setTile(pos, tile);
     }
 
     private void interact() {
