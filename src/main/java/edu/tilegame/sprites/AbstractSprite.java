@@ -27,4 +27,14 @@ public abstract class AbstractSprite implements Sprite {
     public void despawn() {
         world.setTile(pos, currentTile);
     }
+
+    @Override
+    public Position getPosition() {
+        return pos;
+    }
+
+    @Override
+    public Tile getCurrentTile() {
+        return currentTile;
+    }
 }

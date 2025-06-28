@@ -3,6 +3,7 @@ package edu.tilegame.core;
 import edu.tilegame.sprites.Player;
 import edu.tilegame.tengine.CustomTerminalFactory;
 import edu.tilegame.tengine.TileRenderer;
+import edu.tilegame.tengine.Tileset;
 import edu.tilegame.utils.Position;
 import edu.tilegame.world.Dungeon;
 import edu.tilegame.world.World;
@@ -30,7 +31,9 @@ public class Game {
     }
 
     public void start() {
-        startStage();
+        boolean exit = false;
+        while (!exit)
+            startStage();
     }
 
     /**
@@ -43,15 +46,19 @@ public class Game {
         spawnPlayer(dg.getPlayerInitialPosition());
         world.tick();
 
-
         // Main loop.
         boolean exit = false;
-        while(!exit) {
+        while (!exit) {
             // Update sprites.
             player.tick();
 
             // Update world.
             world.tick();
+
+            // Check whether player is at exit.
+            if (player.getCurrentTile() == Tileset.EXIT) {
+                exit = true;
+            }
         }
     }
 

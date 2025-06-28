@@ -412,7 +412,7 @@ public class Dungeon extends AbstractWorldGenerator {
         // Try multiple times to find furthest position from exit.
         Position bestPos = new Position(-1, -1);
         double longestDistance = -1;
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 10; ++i) {
             Position pos;
             do {
                 pos = new Position(RandomUtils.uniform(random, world.WIDTH),
@@ -421,6 +421,7 @@ public class Dungeon extends AbstractWorldGenerator {
             double dist = pos.distanceTo(exitPosition);
             if (dist > longestDistance) {
                 bestPos = pos;
+                longestDistance = dist;
             }
         }
 

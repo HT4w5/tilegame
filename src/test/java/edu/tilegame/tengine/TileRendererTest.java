@@ -26,7 +26,7 @@ public class TileRendererTest {
 
         stage[0][0] = Tileset.WALL;
         stage[49][19] = Tileset.WALL;
-        stage[0][1] = Tileset.PLAYER;
+        stage[0][1] = Tileset.PLAYER_N;
         stage[0][2] = Tileset.FLOOR;
 
         tr.renderFrame(stage);
