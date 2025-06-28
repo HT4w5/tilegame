@@ -4,6 +4,7 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class Tile {
     private final char character;
@@ -20,5 +21,23 @@ public class Tile {
         term.setBackgroundColor(bColor);
         term.setForegroundColor(fColor);
         term.putCharacter(character);
+    }
+
+    /* Make hashable for use with HashSet */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Tile))
+            return false;
+        Tile tile = (Tile) o;
+        return character == tile.character &&
+                Objects.equals(fColor, tile.fColor) &&
+                Objects.equals(bColor, tile.bColor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(character, fColor, bColor);
     }
 }

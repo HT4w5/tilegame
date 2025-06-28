@@ -1,7 +1,9 @@
 package edu.tilegame.core;
 
+import edu.tilegame.sprites.Player;
 import edu.tilegame.tengine.CustomTerminalFactory;
 import edu.tilegame.tengine.TileRenderer;
+import edu.tilegame.utils.Position;
 import edu.tilegame.world.Dungeon;
 import edu.tilegame.world.World;
 
@@ -15,21 +17,45 @@ public class Game {
     private TileRenderer tr;
     private World world;
 
+    private Player player;
+
     public Game() {
         // Initialize terminal.
         CustomTerminalFactory ctf = new CustomTerminalFactory();
         ctf.setTerminalSize(WIDTH, HEIGHT);
         term = ctf.createCustomTerminal();
 
-        tr = new TileRenderer(81, 45, term);
+        tr = new TileRenderer(WIDTH, HEIGHT, term);
         world = new World(WIDTH, HEIGHT, tr);
     }
 
     public void start() {
+        startStage();
+    }
+
+    /**
+     * Start a stage where the world is generated once.
+     */
+    private void startStage() {
+        Dungeon dg = new Dungeon(world);
+        dg.generate();
+
+        spawnPlayer(dg.getPlayerInitialPosition());
+        world.tick();
+
+
+        // Main loop.
         boolean exit = false;
         while(!exit) {
-            Dungeon dg = new Dungeon(world);
-            dg.generate();
+            // Update sprites.
+            player.tick();
+
+            // Update world.
+            world.tick();
         }
+    }
+
+    private void spawnPlayer(Position pos) {
+        player = new Player(world, pos, term);
     }
 }

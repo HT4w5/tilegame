@@ -1,17 +1,7 @@
 package edu.tilegame.tengine;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.awt.Font;
-import java.awt.FontFormatException;
-
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
-
-import edu.tilegame.exceptions.ScreenTooSmallException;
-import edu.tilegame.Properties;
 
 public class TileRenderer {
     private int width;

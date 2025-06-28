@@ -1,9 +1,5 @@
 package edu.tilegame.world;
 
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Vector;
-
 import edu.tilegame.tengine.Tile;
 import edu.tilegame.tengine.TileRenderer;
 import edu.tilegame.tengine.Tileset;
@@ -72,6 +68,11 @@ public class World {
             return;
         }
         world[xPos][yPos] = t;
+    }
+
+    // Shim method.
+    public void setTile(Position pos, Tile t) {
+        setTile(pos.getX(), pos.getY(), t);
     }
 
     // Set single tile in world array if previous tile is prev.
@@ -278,6 +279,11 @@ public class World {
         return world[pos.getX()][pos.getY()];
     }
 
+    /**
+     * Checks whether pos is in bounds.
+     * @param pos Target position.
+     * @return Whether pos is in bounds.
+     */
     public boolean contains(Position pos) {
         if (pos.getX() >= 0 &&
                 pos.getY() >= 0 &&
